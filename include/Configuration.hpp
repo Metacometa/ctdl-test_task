@@ -12,7 +12,6 @@ public:
     int period;
 
     Metrics metrics;
-    гит добавь
 
     //outputs
     bool console;

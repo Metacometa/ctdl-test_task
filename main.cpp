@@ -1,29 +1,31 @@
-#include "Configuration.hpp"
+#include "Monitoring.hpp"
 
 void print(const int arr[], const int& size);
+void test_print_proc();
 
 int main(int argc, char* argv[])
 {
+    // test_print_proc();
+    // return 0;
     if (argc > 1)
     {
         try
         {
-            Configuration configuration(argv[1]);
-
-            std::cout << "Period: " << configuration.period << std::endl;
+            Monitoring monitoring(argv[1]);
+            // std::cout << "Period: " << configuration.period << std::endl;
             
-            std::cout << "Ids: ";
-            for(auto &i: configuration.metrics.cpu_ids)
-            {
-                std::cout << i << ", ";
-            }
-            std::cout << std::endl;
-
-            std::cout << "Used memory: " << configuration.metrics.used_memory;
-            std::cout << "/Free memory: " << configuration.metrics.free_memory << std::endl;
-
-            std::cout << "Console: " << configuration.console << std::endl;
-            std::cout << "Log: " << configuration.log << " " << configuration.log_path << std::endl;
+            // std::cout << "Ids: ";
+            // for(auto &i: configuration.metrics.cpu_ids)
+            // {
+            //     std::cout << i << ", ";
+            // }
+            // std::cout << std::endl;
+    
+            // std::cout << "Used memory: " << configuration.metrics.used_memory;
+            // std::cout << "/Free memory: " << configuration.metrics.free_memory << std::endl;
+    
+            // std::cout << "Console: " << configuration.console << std::endl;
+            // std::cout << "Log: " << configuration.log << " " << configuration.log_path << std::endl;
         }
         catch (json::parse_error error)
         {
@@ -71,4 +73,19 @@ void print(const int arr[], const int& size)
     }
 
     std::cout << std::endl;
+}
+
+void test_print_proc()
+{
+    std::ifstream filestat("/proc/stat");
+
+    std::string line;
+    std::getline(filestat, line);
+    
+    unsigned n;
+    while(std::getline(filestat, line))
+    {
+        // use n here...
+        std::cout << line << '\n';
+    }
 }

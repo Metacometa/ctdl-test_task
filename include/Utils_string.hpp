@@ -45,3 +45,8 @@ const std::string unknown_spec_error_msg = "Unknown 'spec' value: ";
 const std::string outputs_error_msg =  "No 'outputs' value"; 
 const std::string path_error_msg =  "No 'path' value in type 'log'"; 
 const std::string path_string_error_msg = "Path value are not string";
+
+const std::string proc_stat_error_msg = "Cant't open: ";
+
+//utils
+const std::string filestat_str = "/proc/stat";
