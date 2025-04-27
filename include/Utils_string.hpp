@@ -50,3 +50,4 @@ const std::string proc_stat_error_msg = "Cant't open: ";
 
 //utils
 const std::string filestat_str = "/proc/stat";
+const std::string cpu_substr = "cpu";

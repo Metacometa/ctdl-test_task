@@ -59,7 +59,7 @@ void Metrics::ParseCpu(const json &json)
         }
         else
         {
-            cpu_ids.emplace_back(json_id.get<int>());
+            cpu_ids.insert(json_id.get<int>());
         }
     }
 }
