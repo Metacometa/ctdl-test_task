@@ -1,21 +1,15 @@
 #include "Monitoring.hpp"
 
-Monitoring::Monitoring(char *json_path) : configuration(json_path)
+Monitoring::Monitoring(char *json_path) : config(json_path)
 { 
-    UpdateInstantCpuLoad();
-    UpdateMemInfo();
-
-
-    for(auto& cpu_id:configuration.metrics.cpu_ids)
+    while(true)
     {
-        if (instant_cpu_loads.count(cpu_id))
-        {
-            std::cout << "Instant load [" << cpu_id << "]: " << instant_cpu_loads[cpu_id] << "%" << std::endl;
-        }   
-    }
+        UpdateInstantCpuLoad();
+        UpdateMemInfo();
 
-    std::cout << "Free_memory: " << free_memory << std::endl;
-    std::cout << "Used_memory: " << used_memory << std::endl;
+        Output(std::cout);
+        std::this_thread::sleep_for(std::chrono::seconds(config.period));
+    }
 }
 
 void Monitoring::UpdateInstantCpuLoad()
@@ -30,7 +24,7 @@ void Monitoring::UpdateInstantCpuLoad()
 
     for (int i = 0; i < current_cpu_stats.size(); i++)
     {
-        if (configuration.metrics.cpu_ids.count(i))
+        if (config.metrics.cpu_ids.count(i))
         {
             float instant_cpu_load = CalculateInstantCpuLoads(prev_cpu_stats[i], current_cpu_stats[i]);
 
@@ -38,7 +32,7 @@ void Monitoring::UpdateInstantCpuLoad()
         }
     }
 
-    for(auto& cpu_id:configuration.metrics.cpu_ids)
+    for(auto& cpu_id:config.metrics.cpu_ids)
     {
         if (!instant_cpu_loads.count(cpu_id))
         {
@@ -126,4 +120,58 @@ void Monitoring::UpdateMemInfo()
     {
         throw std::logic_error(meminfo_error_msg + file_meminfo_str);
     }    
+}
+
+void Monitoring::Output(std::ostream& stream)
+{
+    int padding = 12;
+
+    std::time_t t = std::time(nullptr);
+    std::tm now{};
+
+    localtime_r(&t, &now);
+
+    std::stringstream ss;
+    ss << std::put_time(&now, "%H:%M:%S");
+
+    std::string time;
+    ss >> time;
+
+    stream << std::left << std::setw(padding) << time;
+
+    for(auto& cpu_id:config.metrics.cpu_ids)
+    {
+        if (instant_cpu_loads.count(cpu_id))
+        {
+            stream << std::left << std::setw(padding) << ("core " + std::to_string(cpu_id));
+        }   
+    }
+    stream << std::endl;
+    stream << std::left << std::setw(padding) << "CPU";
+
+    for(auto& cpu_id:config.metrics.cpu_ids)
+    {
+        if (instant_cpu_loads.count(cpu_id))
+        {
+            std::stringstream s;
+            s << instant_cpu_loads[cpu_id] << "%";
+
+            stream << std::left << std::setw(padding) << s.str();
+        }   
+    }
+
+    stream << std::endl;
+
+    stream << std::left << std::setw(padding) << time 
+        << std::left << std::setw(padding) << "Used"
+        << std::left << std::setw(padding) << "Free";
+
+    std::cout << std::endl;
+
+    stream << std::left << std::setw(padding) << "Memory"
+        << std::left << std::setw(padding) << (std::to_string(used_memory) + " MB")
+        << std::left << std::setw(padding) << (std::to_string(free_memory) + " MB");
+
+
+    std::cout << std::endl << std::endl;
 }

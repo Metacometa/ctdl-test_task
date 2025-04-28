@@ -1,16 +1,20 @@
+#pragma once
+
 #include <sstream>
 #include <unordered_map>
 
 #include <chrono>
 #include <thread>
 #include <cmath>
+#include <ctime>
+#include <iomanip>
 
 #include "Configuration.hpp"
 #include "CPUStats.hpp"
 
 class Monitoring
 {
-    Configuration configuration;
+    Configuration config;
 
 public:
     Monitoring() = delete;
@@ -26,4 +30,7 @@ private:
     float CalculateInstantCpuLoads(const CPUStats& prev, const CPUStats& curr);
 
     void UpdateMemInfo();
+
+    void StartMonitoring();
+    void Output(std::ostream& stream);
 };
