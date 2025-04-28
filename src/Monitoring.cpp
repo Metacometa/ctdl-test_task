@@ -3,6 +3,19 @@
 Monitoring::Monitoring(char *json_path) : configuration(json_path)
 { 
     UpdateInstantCpuLoad();
+    UpdateMemInfo();
+
+
+    for(auto& cpu_id:configuration.metrics.cpu_ids)
+    {
+        if (instant_cpu_loads.count(cpu_id))
+        {
+            std::cout << "Instant load [" << cpu_id << "]: " << instant_cpu_loads[cpu_id] << "%" << std::endl;
+        }   
+    }
+
+    std::cout << "Free_memory: " << free_memory << std::endl;
+    std::cout << "Used_memory: " << used_memory << std::endl;
 }
 
 void Monitoring::UpdateInstantCpuLoad()
@@ -19,10 +32,18 @@ void Monitoring::UpdateInstantCpuLoad()
     {
         if (configuration.metrics.cpu_ids.count(i))
         {
-            float instant_load = CalculateCpuLoad(prev_cpu_stats[i], current_cpu_stats[i]);
+            float instant_cpu_load = CalculateInstantCpuLoads(prev_cpu_stats[i], current_cpu_stats[i]);
 
-            std::cout << "Instant load: " << instant_load << "%" << std::endl;
+            instant_cpu_loads[i] = instant_cpu_load;
         }
+    }
+
+    for(auto& cpu_id:configuration.metrics.cpu_ids)
+    {
+        if (!instant_cpu_loads.count(cpu_id))
+        {
+            throw std::logic_error(nonexistent_kernel_error_msg + std::to_string(cpu_id));
+        }        
     }
 }
 
@@ -58,17 +79,8 @@ void Monitoring::ReadCpuStats(std::vector<CPUStats>& cpu_stats)
     }
 }
 
-float Monitoring::CalculateCpuLoad(const CPUStats& prev, const CPUStats& curr)
+float Monitoring::CalculateInstantCpuLoads(const CPUStats& prev, const CPUStats& curr)
 {
-    // user = 4705;
-    // nice = 306;
-    // system = 584;
-    // idle = 3699;
-    // iowait = 23;
-    // irq = 23;
-    // softirq = 0;
-    // steal = 0;
-
     unsigned long prev_total = prev.user + prev.nice + 
         prev.system + prev.idle + prev.iowait + prev.irq + prev.softirq + prev.steal;
 
@@ -79,12 +91,39 @@ float Monitoring::CalculateCpuLoad(const CPUStats& prev, const CPUStats& curr)
 
     unsigned idle_diff = (curr.iowait + curr.idle) - (prev.iowait + prev.idle);
 
-    //std::cout << "Time: " << total_time << " " << idle_time << " " << usage_time <<std::endl;
-
     float load = (total_diff > 0) ? 100.0f * (total_diff - idle_diff) / total_diff : 0;
 
-    // std::cout << "Test: " << label << " " << user << " " << nice << " " <<system 
-    // << " " <<idle << " " <<iowait << " " <<irq
-    // << softirq << " " << steal << std::endl;
     return roundf(load * 100) / 100;
+}
+
+void Monitoring::UpdateMemInfo()
+{
+    std::string mem_line;
+    std::string label;
+    unsigned long total_memory, temp_used_memory, temp_free_memory;
+
+    std::ifstream meminfo(file_meminfo_str);
+    std::stringstream ss;
+
+    if (meminfo.is_open())
+    {
+        std::getline(meminfo, mem_line);
+        ss << mem_line;
+        ss >> label >> total_memory;
+
+        std::getline(meminfo, mem_line);
+
+        std::getline(meminfo, mem_line);
+        ss << mem_line;
+        ss >> label >> temp_free_memory;
+
+        temp_used_memory = total_memory - temp_free_memory;
+
+        used_memory = temp_used_memory / 1024;
+        free_memory = temp_free_memory / 1024;
+    }
+    else
+    {
+        throw std::logic_error(meminfo_error_msg + file_meminfo_str);
+    }    
 }

@@ -46,8 +46,13 @@ const std::string outputs_error_msg =  "No 'outputs' value";
 const std::string path_error_msg =  "No 'path' value in type 'log'"; 
 const std::string path_string_error_msg = "Path value are not string";
 
-const std::string proc_stat_error_msg = "Cant't open: ";
+const std::string proc_stat_error_msg = "Cant't open this path: ";
+const std::string meminfo_error_msg = "Can't open this path: ";
+
+const std::string nonexistent_kernel_error_msg = "Nonexistent kernel id: ";
 
 //utils
 const std::string filestat_str = "/proc/stat";
+const std::string file_meminfo_str = "/proc/meminfo";
+
 const std::string cpu_substr = "cpu";

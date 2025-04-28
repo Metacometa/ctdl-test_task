@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_set>
+#include <set>
 #include <iostream>
 
 #include "json.hpp"
@@ -14,7 +14,7 @@ class Metrics
 {
 //vars
 public:
-    std::unordered_set<int> cpu_ids;
+    std::set<int> cpu_ids;
     bool used_memory;
     bool free_memory;
 
