@@ -26,6 +26,7 @@ Configuration::Configuration(const json &json) : Configuration()
 Configuration::Configuration(char* json_path) : Configuration()
 {
     std::fstream json_file(json_path);
+
     json json = json::parse(json_file);
 
     init(json);
