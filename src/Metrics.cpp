@@ -10,7 +10,7 @@ void Metrics::init(const json &json)
 {
     if (!json.contains(metrics_str))
     {
-        throw std::logic_error(metrics_init_error_msg);
+        throw my_parse_error(metrics_init_error_msg);
     }
 
     auto metrics = json[metrics_str];
@@ -19,7 +19,7 @@ void Metrics::init(const json &json)
     {
         if (!metric.contains(type_str))
         {
-            throw std::logic_error(type_error_msg);
+            throw my_parse_error(type_error_msg);
         }
 
         std::string type = metric[type_str].get<std::string>();
@@ -33,7 +33,7 @@ void Metrics::init(const json &json)
         }
         else
         {
-            throw std::logic_error(metrics_uknown_type_error_msg + type);
+            throw my_parse_error(metrics_uknown_type_error_msg + type);
         }
 
     }
@@ -43,19 +43,19 @@ void Metrics::ParseCpu(const json &json)
 {
     if (!json.contains(cpu_ids_str))
     {
-        throw std::logic_error(cpu_ids_error_msg);
+        throw my_parse_error(cpu_ids_error_msg);
     }
 
     if (!json[cpu_ids_str].is_array())
     {
-        throw std::logic_error(cpu_ids_array_error_msg);
+        throw my_parse_error(cpu_ids_array_error_msg);
     }
 
     for(auto& json_id:json[cpu_ids_str])
     {
         if (!json_id.is_number())
         {
-            throw std::logic_error(cpu_ids_number_error_msg);      
+            throw my_parse_error(cpu_ids_number_error_msg);      
         }
         else
         {
@@ -68,19 +68,19 @@ void Metrics::ParseMemory(const json &json)
 {
     if (!json.contains(spec_str))
     {
-        throw std::logic_error(spec_error_msg);
+        throw my_parse_error(spec_error_msg);
     }
 
     if (!json[spec_str].is_array())
     {
-        throw std::logic_error(spec_array_error_msg);
+        throw my_parse_error(spec_array_error_msg);
     }
 
     for(auto& json_spec:json[spec_str])
     {
         if (!json_spec.is_string())
         {
-            throw std::logic_error(spec_string_error_msg);      
+            throw my_parse_error(spec_string_error_msg);      
         }
 
         std::string json_spec_str = json_spec.get<std::string>();
@@ -94,7 +94,7 @@ void Metrics::ParseMemory(const json &json)
         }
         else
         {
-            throw std::logic_error(unknown_spec_error_msg + json_spec_str);    
+            throw my_parse_error(unknown_spec_error_msg + json_spec_str);    
         }
     }
 }

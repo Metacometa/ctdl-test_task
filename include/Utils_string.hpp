@@ -1,5 +1,7 @@
 #include <string>
 
+#include "my_parse_error.hpp"
+
 const std::string settings_str = "settings";
 const std::string period_str = "period";
 
@@ -27,6 +29,7 @@ const std::string path_str = "path";
 //errors
 const std::string settings_error_msg = "No 'settings' value";
 const std::string period_error_msg = "No 'settings[period]' value";
+const std::string incorrect_period_error_msg = "Incorrect 'period' value";
 
 
 const std::string metrics_init_error_msg = "No 'metrics' value";
@@ -50,6 +53,8 @@ const std::string proc_stat_error_msg = "Cant't open this path: ";
 const std::string meminfo_error_msg = "Can't open this path: ";
 
 const std::string nonexistent_kernel_error_msg = "Nonexistent kernel id: ";
+
+const std::string incorrect_logfile_error_msg = "Incorrect path to log file";
 
 //utils
 const std::string filestat_str = "/proc/stat";

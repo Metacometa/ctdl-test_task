@@ -2,6 +2,7 @@
 
 Configuration::Configuration()
 {
+    period = 1;
     console = false;
     log = false;
     log_path = "";
@@ -13,6 +14,8 @@ Configuration::Configuration(std::string json_path) : Configuration()
     json json = json::parse(json_file);
 
     init(json);
+
+    json_file.close();
 }
 
 Configuration::Configuration(const json &json) : Configuration()
@@ -26,6 +29,8 @@ Configuration::Configuration(char* json_path) : Configuration()
     json json = json::parse(json_file);
 
     init(json);
+
+    json_file.close();
 }
 
 void Configuration::init(const json &json)
@@ -41,25 +46,32 @@ void Configuration::ParseSettings(const json &json)
 {
     if (!json.contains(settings_str))
     {
-        throw std::logic_error(settings_error_msg); 
+        throw my_parse_error(settings_error_msg); 
     }
 
     auto json_settings = json[settings_str];
 
     if (!json_settings.contains(period_str))
     {
-        throw std::logic_error(period_error_msg);
+        throw my_parse_error(period_error_msg);
     }
 
-    std::string string_period = json_settings[period_str].get<std::string>();
-    period = std::stoi(string_period);
+    try
+    {
+        std::string string_period = json_settings[period_str].get<std::string>();
+        period = std::stoi(string_period);
+    }
+    catch(const std::exception& e)
+    {
+        throw my_parse_error(incorrect_period_error_msg);
+    }
 }
 
 void Configuration::ParseOutputs(const json &json)
 {
     if (!json.contains(outputs_str))
     {
-        throw std::logic_error(outputs_error_msg);
+        throw my_parse_error(outputs_error_msg);
     }
 
     auto outputs = json[outputs_str];
@@ -68,7 +80,7 @@ void Configuration::ParseOutputs(const json &json)
     {
         if (!output.contains(type_str))
         {
-            throw std::logic_error(type_error_msg);
+            throw my_parse_error(type_error_msg);
         }
 
         std::string type = output[type_str].get<std::string>();
@@ -82,7 +94,7 @@ void Configuration::ParseOutputs(const json &json)
         }
         else
         {
-            throw std::logic_error(metrics_uknown_type_error_msg + type);
+            throw my_parse_error(metrics_uknown_type_error_msg + type);
         }
     }
 }
@@ -91,12 +103,12 @@ void Configuration::ParseLog(const json &json)
 {
     if (!json.contains(path_str))
     {
-        throw std::logic_error(path_error_msg);
+        throw my_parse_error(path_error_msg);
     }
 
     if (!json[path_str].is_string())
     {
-        throw std::logic_error(path_string_error_msg);      
+        throw my_parse_error(path_string_error_msg);      
     }
 
     log = true;

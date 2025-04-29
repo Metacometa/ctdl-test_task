@@ -7,7 +7,27 @@ Monitoring::Monitoring(char *json_path) : config(json_path)
         UpdateInstantCpuLoad();
         UpdateMemInfo();
 
-        Output(std::cout);
+        if (config.console)
+        {
+            Output(std::cout);
+        }
+
+        if (config.log)
+        {
+            std::ofstream file(config.log_path, std::ios::app);
+
+            if (file.is_open())
+            {
+                Output(file);
+            }
+            else
+            {
+                throw my_parse_error(incorrect_logfile_error_msg);
+            }
+
+            file.close();
+        }
+
         std::this_thread::sleep_for(std::chrono::seconds(config.period));
     }
 }
@@ -36,7 +56,7 @@ void Monitoring::UpdateInstantCpuLoad()
     {
         if (!instant_cpu_loads.count(cpu_id))
         {
-            throw std::logic_error(nonexistent_kernel_error_msg + std::to_string(cpu_id));
+            throw my_parse_error(nonexistent_kernel_error_msg + std::to_string(cpu_id));
         }        
     }
 }
@@ -69,8 +89,10 @@ void Monitoring::ReadCpuStats(std::vector<CPUStats>& cpu_stats)
     }
     else
     {
-        throw std::logic_error(proc_stat_error_msg + filestat_str);
+        throw my_parse_error(proc_stat_error_msg + filestat_str);
     }
+
+    filestat.close();
 }
 
 float Monitoring::CalculateInstantCpuLoads(const CPUStats& prev, const CPUStats& curr)
@@ -118,8 +140,10 @@ void Monitoring::UpdateMemInfo()
     }
     else
     {
-        throw std::logic_error(meminfo_error_msg + file_meminfo_str);
+        throw my_parse_error(meminfo_error_msg + file_meminfo_str);
     }    
+
+    meminfo.close();
 }
 
 void Monitoring::Output(std::ostream& stream)
@@ -160,18 +184,18 @@ void Monitoring::Output(std::ostream& stream)
         }   
     }
 
-    stream << std::endl;
+    stream << std::endl << std::endl;
 
     stream << std::left << std::setw(padding) << time 
         << std::left << std::setw(padding) << "Used"
         << std::left << std::setw(padding) << "Free";
 
-    std::cout << std::endl;
+    stream << std::endl;
 
     stream << std::left << std::setw(padding) << "Memory"
         << std::left << std::setw(padding) << (std::to_string(used_memory) + " MB")
         << std::left << std::setw(padding) << (std::to_string(free_memory) + " MB");
 
 
-    std::cout << std::endl << std::endl;
+    stream << std::endl << std::endl;
 }
